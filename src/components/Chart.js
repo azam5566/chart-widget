@@ -4,12 +4,44 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 import uPlot from 'uplot'
 import UplotReact from 'uplot-react'
+import { findProp } from '../util'
 
 export default function Chart(props) {
     const chartDataSet = useSelector(state => state.chartDataSet);
     const chartData = useSelector(state => state.chartData)
-    let xData = chartData[chartDataSet[props?.index]]?.timeseries?.map(item => item.time)
-    let yData = chartData[chartDataSet[props?.index]]?.timeseries?.map(item => item.value)
+
+    function getPath() {
+        let path = chartDataSet[props?.index]
+        console.log({ path });
+        if (typeof path !== "string") {
+            if (path?.length > 0) {
+                let pathArr = []
+                path.forEach(item => {
+                    pathArr.push([item])
+                })
+
+                console.log('====================================');
+                console.log({ pathArr });
+                console.log('====================================');
+                let finalPath = chartData[props?.index]
+                pathArr.forEach((item, index) => {
+                    finalPath = finalPath[item]
+                })
+
+                return finalPath
+            }
+
+        } else {
+            return chartData[props?.index]
+        }
+    }
+
+    getPath()
+
+    // let xData = chartData[chartDataSet[props?.index]]?.timeseries?.map(item => item.time)
+    // let yData = chartData[chartDataSet[props?.index]]?.timeseries?.map(item => item.value)
+    let xData = getPath()?.timeseries?.map(item => item.time)
+    let yData = getPath()?.timeseries?.map(item => item.value)
     let currentZoom = 1
     let chartRef
 

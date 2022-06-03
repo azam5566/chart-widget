@@ -22,7 +22,28 @@ const initChartData = [{
             time: 1555473994,
             value: 0.0
         }
-    ]
+    ],
+    newData: {
+        timeseries: [
+            {
+                time: 1555473904,
+                value: 0.0
+            }
+        ],
+
+        newData2: {
+            timeseries: [
+                {
+                    time: 1555473904,
+                    value: 0.0
+                },
+                {
+                    time: 1555473907,
+                    value: 1.0
+                }
+            ]
+        }
+    }
 },
 {
     type: "machine2",
@@ -53,7 +74,7 @@ const initChartData = [{
 ]
 const initialState = {
     chartData: initChartData,
-    chartDataSet: [0, 1]
+    chartDataSet: ["/", "/"]
 }
 
 export default function reducer(state = initialState, action) {

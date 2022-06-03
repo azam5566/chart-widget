@@ -8,6 +8,7 @@ import DynamicMinMaxLayout from './ResizeableHandles';
 import { Box, Button, FormControl, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Select, SwipeableDrawer } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiCall } from './apiCall';
+import { findProp } from './util';
 
 
 function App() {
@@ -18,6 +19,9 @@ function App() {
   const [selectedChart, setSelectedChart] = useState();
   const chartDataSet = useSelector(state => state.chartDataSet);
   const chartData = useSelector(state => state.chartData)
+
+  const [chartOnePath, setChartOnePath] = useState([]);
+  const [chartTwoPath, setChartTwoPath] = useState([]);
 
   // console.log('====================================');
   // console.log({ chartData });
@@ -48,7 +52,15 @@ function App() {
 
   function handleSaveClick() {
     let temp = [...chartDataSet]
-    temp[selectedChart] = selectedDataSet
+
+    let tempArr
+    if (selectedDataSet?.length > 1) {
+      tempArr = selectedDataSet.split(".")
+    } else {
+      tempArr = "/"
+    }
+
+    temp[selectedChart] = tempArr
 
     console.log({ temp });
     dispatch({
@@ -58,17 +70,42 @@ function App() {
     setOpenDrawer(false);
   }
 
-
-
   useEffect(() => {
-    // let newChart = [...chartData]
-    const timer = setInterval(function () {
-      dispatch(apiCall())
-    }, 2000,)
+    let chartOnePath
+    let chartTwoPath
+    chartData.forEach((item, index) => {
+      if (index === 0) {
+        let tme = findProp(item, 'timeseries')
+        let paths = []
+        tme.map(item => {
+          paths.push(item.path)
+        })
 
-    return () => {
-      clearInterval(timer);
-    }
+        chartOnePath = paths
+      } else {
+        let tme = findProp(item, 'timeseries')
+        let paths = []
+        tme.map(item => {
+          paths.push(item.path)
+        })
+        chartTwoPath = paths
+      }
+    })
+
+    console.log('====================================');
+    console.log({ chartOnePath });
+    console.log('====================================');
+
+    setChartOnePath(chartOnePath)
+    setChartTwoPath(chartTwoPath)
+
+    // const timer = setInterval(function () {
+    //   dispatch(apiCall())
+    // }, 2000,)
+
+    // return () => {
+    //   clearInterval(timer);
+    // }
   }, [])
 
   return (
@@ -93,7 +130,7 @@ function App() {
         console.log({ index });
         console.log('====================================');
         setSelectedChart(index)
-        setSelectedDataSet(chartDataSet[index])
+        setSelectedDataSet(typeof chartDataSet[index] === 'object' ? chartDataSet[index].join("") : chartDataSet[index])
         setOpenDrawer(true);
       }} />
       <SwipeableDrawer
@@ -120,8 +157,15 @@ function App() {
                   value={selectedDataSet}
                   onChange={handleChange}
                 >
-                  <MenuItem value={0}>Data Set 1</MenuItem>
-                  <MenuItem value={1}>Data Set 2</MenuItem>
+                  {
+                    selectedChart === 0 ? chartOnePath.map((item, index) =>
+                      <MenuItem value={index == 0 ? "/" : item.slice(0, index).join(".")}>{index === 0 ? "/" : "/" + chartOnePath[index].slice(0, index).join("/")}</MenuItem>
+                    ) :
+
+                      chartTwoPath.map((item, index) =>
+                        <MenuItem value={index == 0 ? "/" : item.slice(0, index).join(".")}>{index === 0 ? "/" : "/" + chartTwoPath[index].slice(0, index).join("/")}</MenuItem>
+                      )
+                  }
                 </Select>
               </FormControl>
             </ListItem>
